@@ -211,7 +211,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({ transactions
                             <span>LittleFS Synced</span>
                           </span>
                         ) : (
-                          <span className="sync-badge realtime" title="Direct live push to Supabase">
+                          <span className="sync-badge realtime" title="Direct live cloud synchronization">
                             <span>Cloud Live</span>
                           </span>
                         )}

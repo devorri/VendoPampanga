@@ -3,8 +3,7 @@ import {
   Package, 
   PlusCircle, 
   AlertCircle, 
-  CheckCircle2, 
-  Cpu 
+  CheckCircle2 
 } from 'lucide-react';
 import type { InventoryItem } from '../types/vending';
 
@@ -121,18 +120,11 @@ export const InventoryGrid: React.FC<InventoryGridProps> = ({
                 </div>
               </div>
 
-              {/* Hardware & IR Sensor Metadata */}
-              <div className="slot-hardware-meta">
-                {/* IR Sensor Reading */}
+              {/* IR Sensor Status */}
+              <div className="slot-hardware-meta" style={{ justifyContent: 'center' }}>
                 <div className={`ir-status-indicator ${isEmpty ? 'empty' : 'ok'}`}>
                   {isEmpty ? <AlertCircle size={13} /> : <CheckCircle2 size={13} />}
-                  <span>IR Sensor: {isEmpty ? 'Out of Stock' : 'Stock Detected'}</span>
-                </div>
-
-                {/* Pin assignment */}
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <Cpu size={12} />
-                  <span>Pin {item.servoPin}</span>
+                  <span>{isEmpty ? 'Sensor: Out of Stock' : 'Sensor: Stock Detected'}</span>
                 </div>
               </div>
 

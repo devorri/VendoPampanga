@@ -7,6 +7,7 @@ interface MetricCardsProps {
   transactions: Transaction[];
   onOpenCashboxModal: () => void;
   onGoToInventory: () => void;
+  onSyncOfflineQueue?: () => void;
 }
 
 export const MetricCards: React.FC<MetricCardsProps> = ({
@@ -14,7 +15,8 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   inventory,
   transactions,
   onOpenCashboxModal,
-  onGoToInventory
+  onGoToInventory,
+  onSyncOfflineQueue
 }) => {
   const completedTxns = transactions.filter(t => t.status === 'completed');
   const totalRevenue = completedTxns.reduce((sum, t) => sum + t.itemPrice, 0);
@@ -98,7 +100,12 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
       </div>
 
       {/* 4. LittleFS Offline Buffer & Cloud Sync */}
-      <div className="stat">
+      <div 
+        className="stat"
+        onClick={() => onSyncOfflineQueue?.()}
+        style={{ cursor: onSyncOfflineQueue ? 'pointer' : 'default' }}
+        role={onSyncOfflineQueue ? 'button' : undefined}
+      >
         <div>
           <div className="label">Offline queue</div>
           <div className="value">{machine.offlineQueueCount} pending</div>

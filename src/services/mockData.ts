@@ -246,7 +246,7 @@ export const INITIAL_LOGS: MaintenanceLog[] = [
     type: 'offline_sync',
     severity: 'success',
     title: 'Offline LittleFS Buffer Synced',
-    details: 'WiFi connectivity re-established with AP "DepEd_Pampanga_WiFi". 2 offline purchases (TXN-88419, TXN-88418) were uploaded to Supabase.',
+    details: 'WiFi connectivity re-established with AP "DepEd_Pampanga_WiFi". 2 offline purchases (TXN-88419, TXN-88418) were uploaded to cloud database.',
     operator: 'ESP32 Firmware Auto-Sync'
   },
   {
@@ -255,7 +255,7 @@ export const INITIAL_LOGS: MaintenanceLog[] = [
     type: 'firmware_reboot',
     severity: 'warning',
     title: 'WiFi Outage Detected — Offline Mode Engaged',
-    details: 'ESP32 ping failed to Supabase REST endpoint. Switched to local offline LittleFS transaction logging.',
+    details: 'Network ping failed to cloud endpoint. Switched to local offline LittleFS transaction logging.',
     operator: 'ESP32 System Watchdog'
   },
   {

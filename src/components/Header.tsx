@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
             title={`Machine ID: ${machine.id}`}
           >
             <span className={`status-dot ${machine.status === 'online' ? 'live-pulse' : ''}`} />
-            <span>ESP32 {machine.status === 'online' ? 'Online' : 'Offline'}</span>
+            <span>{machine.status === 'online' ? 'Machine Online' : 'Machine Offline'}</span>
           </div>
 
           {/* Cabinet Door Security Switch */}

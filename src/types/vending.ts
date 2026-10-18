@@ -74,4 +74,4 @@ export interface SupabaseConfig {
   isCustom: boolean;
 }
 
-export type ActiveTab = 'overview' | 'inventory' | 'transactions' | 'hardware' | 'logs' | 'supabase';
+export type ActiveTab = 'overview' | 'inventory' | 'transactions' | 'logs';

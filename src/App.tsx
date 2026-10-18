@@ -10,13 +10,8 @@ import type {
   InventoryItem, 
   Transaction, 
   MaintenanceLog, 
-  ActiveTab, 
-  SupabaseConfig 
+  ActiveTab 
 } from './types/vending';
-import { 
-  getStoredSupabaseConfig, 
-  saveSupabaseConfig 
-} from './services/supabaseClient';
 
 // Components
 import { Header } from './components/Header';
@@ -24,13 +19,11 @@ import { Navigation } from './components/Navigation';
 import { MetricCards } from './components/MetricCards';
 import { InventoryGrid } from './components/InventoryGrid';
 import { TransactionTable } from './components/TransactionTable';
-import { MachineHealth } from './components/MachineHealth';
 import { SalesAnalytics } from './components/SalesAnalytics';
 import { MaintenanceSection } from './components/MaintenanceSection';
 
 // Modals
 import { RestockModal } from './components/RestockModal';
-import { SupabaseSetupModal } from './components/SupabaseSetupModal';
 import { CashboxModal } from './components/CashboxModal';
 
 // Styles
@@ -51,11 +44,7 @@ export function App() {
   // Modals State
   const [isRestockModalOpen, setIsRestockModalOpen] = useState<boolean>(false);
   const [selectedRestockItem, setSelectedRestockItem] = useState<InventoryItem | null>(null);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
   const [isCashboxModalOpen, setIsCashboxModalOpen] = useState<boolean>(false);
-
-  // Supabase Config State
-  const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig>(getStoredSupabaseConfig());
 
   // Show Toast Helper
   const showToast = (message: string) => {
@@ -103,11 +92,11 @@ export function App() {
         type: 'offline_sync',
         severity: 'success',
         title: `Offline LittleFS Buffer Synced (${syncCount} items)`,
-        details: `WiFi reconnected. Uploaded ${syncCount} queued offline transactions to Supabase REST endpoint successfully.`,
+        details: `WiFi reconnected. Uploaded ${syncCount} queued offline transactions to cloud database successfully.`,
         operator: 'ESP32 LittleFS Auto-Sync'
       };
       setLogs(prev => [syncLog, ...prev]);
-      showToast(`${syncCount} offline purchase(s) synced to Supabase.`);
+      showToast(`${syncCount} offline purchase(s) synced to database.`);
     } else {
       showToast('Offline buffer is clear. All transactions are up to date.');
     }
@@ -151,19 +140,6 @@ export function App() {
     };
     setLogs(prev => [log, ...prev]);
     showToast(`Cashbox audited: ₱${collectedAmount.toFixed(2)} collected by ${operatorName}.`);
-  };
-
-  // Handle Supabase Credentials Save
-  const handleSaveSupabaseConfig = (url: string, key: string) => {
-    saveSupabaseConfig(url, key);
-    setSupabaseConfig(getStoredSupabaseConfig());
-    showToast('Supabase project credentials saved.');
-  };
-
-  const handleResetToDemo = () => {
-    saveSupabaseConfig('', '');
-    setSupabaseConfig(getStoredSupabaseConfig());
-    showToast('Reset to Built-in Interactive Demo Mode.');
   };
 
   const lowStockCount = inventory.filter(item => item.currentStock <= item.lowStockThreshold).length;
@@ -217,7 +193,6 @@ export function App() {
             <div className="hero-strip">
               <div>
                 <h1>School Supplies Vending Admin</h1>
-                <p>Real-time machine monitoring, offline LittleFS buffering, and Supabase integration.</p>
               </div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <button 
@@ -243,6 +218,7 @@ export function App() {
               transactions={transactions}
               onOpenCashboxModal={() => setIsCashboxModalOpen(true)}
               onGoToInventory={() => setActiveTab('inventory')}
+              onSyncOfflineQueue={handleSyncOfflineQueue}
             />
 
             {/* Supplies Inventory Grid */}
@@ -285,18 +261,7 @@ export function App() {
           />
         )}
 
-        {/* Tab 4: ESP32 & Hardware Telemetry */}
-        {activeTab === 'hardware' && (
-          <MachineHealth
-            machine={machine}
-            inventory={inventory}
-            onTriggerPing={() => showToast(`Hardware Ping: ESP32 response in 24ms (Signal ${machine.wifiRssi} dBm)`)}
-            onResetCashbox={() => setIsCashboxModalOpen(true)}
-            onForceSyncBuffer={handleSyncOfflineQueue}
-          />
-        )}
-
-        {/* Tab 5: Audit & Maintenance Logs */}
+        {/* Tab 4: Audit & Maintenance Logs */}
         {activeTab === 'logs' && (
           <MaintenanceSection
             logs={logs}
@@ -306,53 +271,6 @@ export function App() {
               setIsRestockModalOpen(true);
             }}
           />
-        )}
-
-        {/* Tab 6: Supabase & Firmware Code */}
-        {activeTab === 'supabase' && (
-          <div className="panel">
-            <div className="panel-header">
-              <div className="panel-title">
-                <h2>Supabase Configuration & Arduino Firmware</h2>
-                <p>Manage Database Connection, SQL Migrations & ESP32 LittleFS Code</p>
-              </div>
-              <button type="button" className="btn" onClick={() => setIsSupabaseModalOpen(true)}>
-                Configure Project
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              <div style={{ background: '#f4f5f7', padding: '1.25rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-                <h4 style={{ color: '#000000', marginBottom: 6, fontSize: '0.9rem' }}>Supabase SQL Migration</h4>
-                <p style={{ fontSize: '0.82rem', color: '#555555', lineHeight: 1.5 }}>
-                  Your schema includes <code>machines</code>, <code>inventory</code>, <code>transactions</code>, and <code>maintenance_logs</code> with real-time websocket replication.
-                </p>
-                <button 
-                  type="button"
-                  className="btn-ghost" 
-                  style={{ marginTop: 12, fontSize: '0.78rem' }}
-                  onClick={() => setIsSupabaseModalOpen(true)}
-                >
-                  View SQL Script
-                </button>
-              </div>
-
-              <div style={{ background: '#f4f5f7', padding: '1.25rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-                <h4 style={{ color: '#000000', marginBottom: 6, fontSize: '0.9rem' }}>ESP32 Offline LittleFS Logic</h4>
-                <p style={{ fontSize: '0.82rem', color: '#555555', lineHeight: 1.5 }}>
-                  The firmware writes purchase events to <code>/offline_txns.json</code> during campus WiFi outages and syncs immediately when connection returns.
-                </p>
-                <button 
-                  type="button"
-                  className="btn" 
-                  style={{ marginTop: 12, fontSize: '0.78rem' }}
-                  onClick={() => setIsSupabaseModalOpen(true)}
-                >
-                  View Arduino C++ Code
-                </button>
-              </div>
-            </div>
-          </div>
         )}
       </main>
 
@@ -369,14 +287,6 @@ export function App() {
         onClose={() => setIsCashboxModalOpen(false)}
         machine={machine}
         onConfirmCollection={handleConfirmCashboxCollection}
-      />
-
-      <SupabaseSetupModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
-        config={supabaseConfig}
-        onSaveConfig={handleSaveSupabaseConfig}
-        onResetToDemo={handleResetToDemo}
       />
     </div>
   );
